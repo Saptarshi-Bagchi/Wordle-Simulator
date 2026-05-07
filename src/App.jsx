@@ -1,121 +1,183 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
 import './App.css'
+import { useEffect, useCallback, useState } from "react"
+import Board from "/components/Board"
+import Keyboard from "/components/Keyboard"
+import { words } from "./words"
 
 function App() {
-  const [count, setCount] = useState(0)
+
+  const emptyBoard = () => [
+    ["", "", "", "", ""],
+    ["", "", "", "", ""],
+    ["", "", "", "", ""],
+    ["", "", "", "", ""],
+    ["", "", "", "", ""],
+    ["", "", "", "", ""],
+  ]
+
+  const [board, setBoard] = useState(emptyBoard())
+  const [currentRow, setCurrentRow] = useState(0)
+  const [currentCol, setCurrentCol] = useState(0)
+  const [gameOver, setGameOver] = useState(false)
+  const [message, setMessage] = useState("")
+  const [shakeRow, setShakeRow] = useState(null)
+  const [locked, setLocked] = useState(false)
+
+  const [colors, setColors] = useState(emptyBoard())
+
+  const [keyColors, setKeyColors] = useState({})
+
+  const [secretWord, setSecretWord] = useState(
+    words[Math.floor(Math.random() * words.length)]
+  )
+
+  const [score, setScore] = useState({ wins: 0, losses: 0 })
+
+  const resetGame = () => {
+    setBoard(emptyBoard())
+    setColors(emptyBoard())
+    setCurrentRow(0)
+    setCurrentCol(0)
+    setGameOver(false)
+    setMessage("")
+    setShakeRow(null)
+    setLocked(false)
+    setKeyColors({})
+    setSecretWord(words[Math.floor(Math.random() * words.length)])
+  }
+
+  const showMessage = (text) => {
+    setMessage(text)
+    setTimeout(() => {
+      setMessage("")
+    }, 2000)
+  }
+
+  const handleKeyPress = useCallback((key) => {
+
+    if (/^[A-Z]$/.test(key)) {
+      if (gameOver || locked) return
+      setBoard(prev => {
+        const newBoard = prev.map(row => [...row])
+        if (prev[currentRow][currentCol] === "") {
+          newBoard[currentRow][currentCol] = key
+        }
+        return newBoard
+      })
+      if (currentCol < 5) setCurrentCol(col => col + 1)
+      return
+    }
+
+    if (key === "BACKSPACE" || key === "BACK") {
+      if (currentCol > 0) {
+        setBoard(prev => {
+          const newBoard = prev.map(row => [...row])
+          newBoard[currentRow][currentCol - 1] = ""
+          return newBoard
+        })
+        setCurrentCol(col => col - 1)
+      }
+      return
+    }
+
+    if (key === "ENTER" && currentCol === 5) {
+      checkRow()
+    }
+  }, [board, currentRow, currentCol, gameOver, locked])
+
+  const checkRow = () => {
+    setLocked(true)
+    const guess = board[currentRow].join("")
+
+    if (!words.includes(guess)) {
+      showMessage("Not a valid word")
+      const row = currentRow
+      setShakeRow(row)
+      setTimeout(() => setShakeRow(null), 500)
+      setLocked(false)
+      return
+    }
+
+    const newColors = colors.map(row => [...row])
+    const newKeyColors = { ...keyColors }
+
+    for (let i = 0; i < 5; i++) {
+      if (guess[i] === secretWord[i]) {
+        newColors[currentRow][i] = "green"
+        newKeyColors[guess[i]] = "green"
+      } else if (secretWord.includes(guess[i])) {
+        newColors[currentRow][i] = "gold"
+        if (newKeyColors[guess[i]] !== "green") {
+          newKeyColors[guess[i]] = "gold"
+        }
+      } else {
+        newColors[currentRow][i] = "gray"
+        if (!newKeyColors[guess[i]]) {
+          newKeyColors[guess[i]] = "gray"
+        }
+      }
+    }
+
+    setColors(newColors)
+    setKeyColors(newKeyColors)
+
+    if (guess === secretWord) {
+      showMessage("You Win!")
+      setScore(s => ({ ...s, wins: s.wins + 1 }))
+      setGameOver(true)
+      setLocked(true)
+      return
+    }
+
+    const nextRow = currentRow + 1
+    setCurrentRow(nextRow)
+    setCurrentCol(0)
+
+    if (nextRow >= 6) {
+      showMessage(`Word was ${secretWord}`)
+      setScore(s => ({ ...s, losses: s.losses + 1 }))
+      setGameOver(true)
+      setLocked(true)
+      return
+    }
+
+    setLocked(false)
+  }
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      const key = event.key.toUpperCase()
+      handleKeyPress(key)
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [handleKeyPress])
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+    <div className="app">
+      <h1>Wordle Simulator</h1>
+      <div className="score">
+        <span className="score-item wins">W {score.wins}</span>
+        <span className="score-divider">|</span>
+        <span className="score-item losses">L {score.losses}</span>
+      </div>
+      {message && (
+        <div className="toast">
+          {message}
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+      )}
+      <Board
+        board={board}
+        colors={colors}
+        shakeRow={shakeRow}
+      />
+      <Keyboard
+        handleKeyPress={handleKeyPress}
+        keyColors={keyColors}
+      />
+      <button className="play-again" onClick={resetGame} disabled={!gameOver}>Play Again</button>
+    </div>
   )
 }
 
