@@ -1,8 +1,8 @@
 # Wordle Simulator
 
-A Wordle-inspired word guessing game built using React and Vite with interactive gameplay, keyboard input handling, and dynamic word validation.
-
-## Features
+A Wordle-inspired word guessing game built using React.
+ 
+## 💎 Features
 
 - 6×5 Wordle-style game board
 - Keyboard input support
@@ -10,22 +10,26 @@ A Wordle-inspired word guessing game built using React and Vite with interactive
 - Color-based feedback system
 - Responsive UI
 
-## Tech Stack
+## 🖥️ Tech Stack
 
 - React
 - Vite
 - JavaScript
 - CSS
 
-## Installation
+## 🪛 Installation
 
 ```bash
-git clone <your-repository-link>
+git clone https://github.com/Saptarshi-Bagchi/Wordle-Simulator
 cd wordle-simulator
 npm install
 npm run dev
 ```
 
-## License
+## 🌍 Deployment
+
+This project is deployed using Vercel.
+
+## ✉️ License
 
 This project is made for educational purposes.
