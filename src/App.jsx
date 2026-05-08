@@ -59,7 +59,7 @@ function App() {
     setMessage(text)
     setTimeout(() => {
       setMessage("")
-    }, 5000)
+    }, 3000)
   }
 
   const handleKeyPress = useCallback((key) => {
