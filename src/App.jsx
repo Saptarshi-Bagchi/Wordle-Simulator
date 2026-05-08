@@ -22,18 +22,26 @@ function App() {
   const [message, setMessage] = useState("")
   const [shakeRow, setShakeRow] = useState(null)
   const [locked, setLocked] = useState(false)
-
   const [colors, setColors] = useState(emptyBoard())
-
   const [keyColors, setKeyColors] = useState({})
+  const [usedWords, setUsedWords] = useState([])
+  const [guessedThisRound, setGuessedThisRound] = useState([])
 
-  const [secretWord, setSecretWord] = useState(
-    words[Math.floor(Math.random() * words.length)]
-  )
+  const pickNewWord = (exclude) => {
+    const remaining = words.filter(w => !exclude.includes(w))
+    const pool = remaining.length > 0 ? remaining : words
+    return pool[Math.floor(Math.random() * pool.length)]
+  }
+
+  const [secretWord, setSecretWord] = useState(() => {
+    return words[Math.floor(Math.random() * words.length)]
+  })
 
   const [score, setScore] = useState({ wins: 0, losses: 0 })
 
   const resetGame = () => {
+    const newUsed = [...usedWords, secretWord]
+    setUsedWords(newUsed)
     setBoard(emptyBoard())
     setColors(emptyBoard())
     setCurrentRow(0)
@@ -43,7 +51,8 @@ function App() {
     setShakeRow(null)
     setLocked(false)
     setKeyColors({})
-    setSecretWord(words[Math.floor(Math.random() * words.length)])
+    setGuessedThisRound([])
+    setSecretWord(pickNewWord(newUsed))
   }
 
   const showMessage = (text) => {
@@ -98,23 +107,52 @@ function App() {
       return
     }
 
+    if (guessedThisRound.includes(guess)) {
+      showMessage("Already guessed that word")
+      const row = currentRow
+      setShakeRow(row)
+      setTimeout(() => setShakeRow(null), 500)
+      setLocked(false)
+      return
+    }
+
+    setGuessedThisRound(prev => [...prev, guess])
+
     const newColors = colors.map(row => [...row])
     const newKeyColors = { ...keyColors }
+    const result = Array(5).fill("gray")
+
+    const secretArr = secretWord.split("")
+    const guessArr = guess.split("")
+
+    const secretRemaining = [...secretArr]
 
     for (let i = 0; i < 5; i++) {
-      if (guess[i] === secretWord[i]) {
-        newColors[currentRow][i] = "green"
-        newKeyColors[guess[i]] = "green"
-      } else if (secretWord.includes(guess[i])) {
-        newColors[currentRow][i] = "gold"
-        if (newKeyColors[guess[i]] !== "green") {
-          newKeyColors[guess[i]] = "gold"
-        }
-      } else {
-        newColors[currentRow][i] = "gray"
-        if (!newKeyColors[guess[i]]) {
-          newKeyColors[guess[i]] = "gray"
-        }
+      if (guessArr[i] === secretArr[i]) {
+        result[i] = "green"
+        secretRemaining[i] = null
+      }
+    }
+
+    for (let i = 0; i < 5; i++) {
+      if (result[i] === "green") continue
+      const idx = secretRemaining.indexOf(guessArr[i])
+      if (idx !== -1) {
+        result[i] = "amber"
+        secretRemaining[idx] = null
+      }
+    }
+
+    for (let i = 0; i < 5; i++) {
+      newColors[currentRow][i] = result[i]
+      const letter = guessArr[i]
+      const color = result[i]
+      if (color === "green") {
+        newKeyColors[letter] = "green"
+      } else if (color === "amber" && newKeyColors[letter] !== "green") {
+        newKeyColors[letter] = "amber"
+      } else if (color === "gray" && !newKeyColors[letter]) {
+        newKeyColors[letter] = "gray"
       }
     }
 

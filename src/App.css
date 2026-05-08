@@ -24,7 +24,7 @@ body {
   justify-content: center;
   align-items: center;
   overflow: hidden;
-  gap: clamp(6px, 1.5vh, 14px);
+  gap: clamp(8px, 2vh, 18px);
 }
 
 .app h1 {
@@ -73,16 +73,31 @@ body {
 }
 
 .cell {
-  width: clamp(40px, 13vw, 62px);
-  height: clamp(40px, 13vw, 62px);
-  border: 2px solid #3a3a3c;
+  width: clamp(36px, 11.7vw, 56px);
+  height: clamp(36px, 11.7vw, 56px);
+  border: 2px solid rgba(255, 255, 255, 0.2);
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: clamp(1.1rem, 4vw, 1.8rem);
+  font-size: clamp(1rem, 3.6vw, 1.6rem);
   font-weight: bold;
   text-transform: uppercase;
-  transition: all 0.3s ease;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.cell.green {
+  background-color: #6aaa64;
+  color: white;
+}
+
+.cell.amber {
+  background-color: #b59a00;
+  color: white;
+}
+
+.cell.gray {
+  background-color: #3a3a3c;
+  color: white;
 }
 
 .flip {
@@ -98,30 +113,69 @@ body {
 .keyboard {
   display: flex;
   flex-direction: column;
-  gap: clamp(3px, 0.8vh, 7px);
+  gap: clamp(4px, 0.8vh, 8px);
+  width: min(500px, 100vw);
+  box-sizing: border-box;
+  padding: 0 6px;
 }
 
 .keyboard-row {
   display: flex;
   justify-content: center;
-  gap: clamp(3px, 0.8vw, 6px);
+  gap: clamp(4px, 0.8vw, 7px);
 }
 
-.keyboard button {
-  height: clamp(36px, 6vh, 52px);
-  min-width: clamp(24px, 7vw, 38px);
+.keyboard-key {
+  height: clamp(44px, 7vh, 58px);
+  min-width: clamp(30px, 8.5vw, 44px);
   border: none;
   border-radius: 4px;
   background-color: #3a3a3c;
   color: white;
   font-weight: bold;
-  font-size: clamp(0.65rem, 2vw, 0.85rem);
+  font-size: clamp(0.75rem, 2.2vw, 0.9rem);
   cursor: pointer;
-  padding: 0 clamp(4px, 1.5vw, 8px);
+  padding: 0 clamp(4px, 1.2vw, 8px);
 }
 
-.keyboard button:hover {
+.keyboard-key.wide {
+  min-width: clamp(50px, 13vw, 66px);
+}
+
+.keyboard-key.green {
+  background-color: #6aaa64;
+  color: white;
+}
+
+.keyboard-key.amber {
+  background-color: #b59a00;
+  color: white;
+}
+
+.keyboard-key.gray {
+  background-color: #818384;
+  color: white;
+}
+
+.keyboard-key:hover {
   opacity: 0.8;
+}
+
+@media (max-width: 420px) {
+  .keyboard-key {
+    height: clamp(46px, 7vh, 56px);
+    min-width: clamp(28px, 8vw, 38px);
+    font-size: clamp(0.75rem, 3.8vw, 0.9rem);
+    gap: 3px;
+  }
+
+  .keyboard-key.wide {
+    min-width: clamp(46px, 12vw, 58px);
+  }
+
+  .keyboard-row {
+    gap: 3px;
+  }
 }
 
 .play-again {

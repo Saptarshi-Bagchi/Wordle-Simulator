@@ -1,11 +1,6 @@
 function Tile({letter, color}) {
   return (
-    <div
-      className={`cell ${color ? "flip" : ""}`}
-      style={{
-        backgroundColor: color
-      }}
-    >
+    <div className={`cell ${color ? "flip " + color : ""}`}>
       {letter}
     </div>
   )

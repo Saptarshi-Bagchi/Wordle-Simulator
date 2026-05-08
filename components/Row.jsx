@@ -4,15 +4,11 @@ function Row({ row, colors, rowIndex, shakeRow }) {
   return (
     <div className={`row ${shakeRow === rowIndex ? "shake" : ""}`}>
       {row.map((cell, cellIndex) => (
-        <div
+        <Tile
           key={cellIndex}
-          className={`cell ${colors?.[cellIndex] ? "flip" : ""}`}
-          style={{
-            backgroundColor: colors?.[cellIndex] || ""
-          }}
-        >
-          {cell}
-        </div>
+          letter={cell}
+          color={colors?.[cellIndex] || ""}
+        />
       ))}
     </div>
   )
